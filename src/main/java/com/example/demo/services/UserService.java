@@ -9,6 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
+import java.util.List;
+
 @Service
 public class UserService {
     private final UserRepository userRepository;
@@ -35,12 +38,13 @@ public class UserService {
         user.setEnabled(true);
         userRepository.save(user);
 
-        // Create and save authority
-        Authority authority = new Authority();
-        authority.setUsername(userDto.getUsername());
-        String role = userDto.getRole() != null && !userDto.getRole().isEmpty()
-                ? userDto.getRole() : "ROLE_USER";
-        authority.setAuthority(role);
-        authorityRepository.save(authority);
+        // Assign default authorities
+        List<String> defaultAuthorities = Arrays.asList("ROLE_USER", "SCOPE_read.message", "SCOPE_write.message");
+        for (String authority : defaultAuthorities) {
+            Authority authorityRecord = new Authority();
+            authorityRecord.setUsername(userDto.getUsername());
+            authorityRecord.setAuthority(authority);
+            authorityRepository.save(authorityRecord);
+        }
     }
 }
